@@ -1,0 +1,38 @@
+name: بحث عن صنف في المناقصات الممنوحة
+
+on:
+  workflow_dispatch:
+    inputs:
+      item_name:
+        description: "اسم الصنف اللي عايز تدور عليه (مثال: Medical Consumables)"
+        required: true
+        type: string
+
+jobs:
+  search:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+    steps:
+      - name: Checkout repo
+        uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+
+      - name: Install dependencies
+        run: pip install -r requirements.txt
+
+      - name: Run search
+        run: |
+          python search_tender.py "${{ inputs.item_name }}" | tee reports/last_search_result.txt
+
+      - name: Commit updated database and report
+        run: |
+          git config user.name "monaqasat-bot"
+          git config user.email "actions@github.com"
+          git add data/monaqasat.db reports/last_search_result.txt
+          git diff --quiet --cached || git commit -m "بحث جديد: ${{ inputs.item_name }}"
+          git push
