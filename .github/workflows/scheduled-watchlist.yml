@@ -1,0 +1,34 @@
+name: متابعة يومية لقائمة الأصناف
+
+on:
+  schedule:
+    - cron: "0 5 * * *"   # كل يوم الساعة 5 صباحًا UTC (8 صباحًا بتوقيت قطر)
+  workflow_dispatch: {}   # يسمح كمان بالتشغيل اليدوي وقت ما تحب
+
+jobs:
+  watch:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+    steps:
+      - name: Checkout repo
+        uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+
+      - name: Install dependencies
+        run: pip install -r requirements.txt
+
+      - name: Run watchlist check
+        run: python watchlist.py
+
+      - name: Commit updated database and report
+        run: |
+          git config user.name "monaqasat-bot"
+          git config user.email "actions@github.com"
+          git add data/monaqasat.db reports/new_matches.md
+          git diff --quiet --cached || git commit -m "متابعة يومية: $(date +'%Y-%m-%d')"
+          git push
