@@ -27,7 +27,8 @@ jobs:
 
       - name: Run search
         run: |
-          python search_tender.py "${{ inputs.item_name }}" | tee reports/last_search_result.txt
+          python search_tender.py "${{ inputs.item_name }}" 2>&1 | tee reports/last_search_result.txt
+          exit ${PIPESTATUS[0]}
 
       - name: Commit updated database and report
         run: |
@@ -35,4 +36,5 @@ jobs:
           git config user.email "actions@github.com"
           git add data/monaqasat.db reports/last_search_result.txt
           git diff --quiet --cached || git commit -m "بحث جديد: ${{ inputs.item_name }}"
+          git pull --rebase origin main
           git push
