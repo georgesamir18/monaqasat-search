@@ -32,6 +32,9 @@ def main():
 
     if not items:
         print("مفيش أصناف في watchlist.txt. ضيف كل صنف في سطر منفصل.")
+        os.makedirs(os.path.dirname(REPORT_FILE), exist_ok=True)
+        with open(REPORT_FILE, "w", encoding="utf-8") as f:
+            f.write("# تقرير مناقصات جديدة\n\nمفيش أصناف مضافة في watchlist.txt للمتابعة حاليًا.\n")
         return
 
     report_lines = ["# تقرير مناقصات جديدة\n"]
